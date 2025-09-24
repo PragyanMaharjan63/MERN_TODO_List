@@ -25,12 +25,41 @@ export default function Hero() {
     };
     getData();
   }, [addTask]);
-  const ToggleChange = (id: number) => {
+  const ToggleChange = async (id: number) => {
+    const currentTask = task.find((t) => t._id === id);
+    if (!currentTask) return;
+
     setTask((prev) =>
       prev.map((task) =>
         task._id === id ? { ...task, isChecked: !task.isChecked } : task
       )
     );
+
+    try {
+      await fetch(`http://localhost:3000/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isChecked: !currentTask.isChecked }),
+      });
+    } catch (err) {
+      console.log(err);
+    }
+    // revert if not changed
+    setTask((prev) =>
+      prev.map((task) =>
+        task._id === id ? { ...task, isChecked: task.isChecked } : task
+      )
+    );
+  };
+
+  const deleteTask = async (id: number) => {
+    const toDelete = await fetch(`http://localhost:3000/tasks/delete/${id}`, {
+      method: "DELETE",
+    });
+    const res = await toDelete.json();
+    console.log(res);
+
+    setTask((prev) => prev.filter((t) => t._id !== id));
   };
 
   return (
@@ -58,7 +87,7 @@ export default function Hero() {
                   <p className="text-sm">{task.desc} </p>
                 </div>
               </div>
-              <X />
+              <X onClick={() => deleteTask(task._id)} />
             </div>
           ))}
         </div>

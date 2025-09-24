@@ -19,6 +19,20 @@ app.get("/", async (req, res) => {
   res.json(Tasks);
 });
 
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      { isChecked: req.body.isChecked },
+      { new: true }
+    );
+    res.json(updatedTask);
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 app.post("/tasks", (req, res) => {
   //   console.log(req.body);
   if (req.body.Title !== "" && req.body.Description !== "") {
@@ -31,6 +45,16 @@ app.post("/tasks", (req, res) => {
     res.json({ status: "ok" });
   } else {
     res.json({ status: "Something went wrong" });
+  }
+});
+
+app.delete("/tasks/delete/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const toDelete = await Task.findByIdAndDelete(id);
+    res.json(toDelete);
+  } catch (err) {
+    console.log(err);
   }
 });
 
